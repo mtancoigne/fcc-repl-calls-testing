@@ -1,0 +1,25 @@
+.CodeMirror {
+  border: 1px solid #CCC;
+  margin-bottom:15px;
+}
+#answer {
+  /*border: 1px solid #CCC;
+  background-color: #f2f2f2;
+  padding: 5px;
+  min-height:300px;
+  margin: 0px;*/
+  color:#888;
+}
+.container-fluid{
+  margin:15px 30px;
+}
+h1{
+  font-size: 1.8em;
+}
+h2{
+  font-size: 1.5em;
+}
+
+.btn-block{
+  width:100%;
+}

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html >
+  <head>
+    <meta charset="UTF-8">
+    <title>REPL API test for PHP</title>
+      <!-- CSS -->
+      <link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.min.css'>
+      <link rel='stylesheet prefetch' href='http://cdnjs.cloudflare.com/ajax/libs/codemirror/5.14.2/codemirror.min.css'>
+      <link rel='stylesheet prefetch' href='http://cdnjs.cloudflare.com/ajax/libs/codemirror/5.14.2/theme/base16-light.min.css'>
+      <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+
+    <!-- UI -->
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col s12">
+          <h1>REPL API test for PHP</h1>
+          <div class="card-panel status-panel">
+            <strong>Status: </strong><span id="status">...</span>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col s4">
+          <!--
+          Challenge description
+          this should be loaded from php/001-challenge.md -->
+          <h2>Challenge x:</h2>
+          <p>Correct the code to have these requirements:</p>
+          <ul class="collection">
+            <li class="collection-item"><code>$arr</code> must be an array of 3 elements.</li>
+            <li class="collection-item"><code>$arr</code> must contain integers only.</li>
+            <li class="collection-item"><code>$str</code> must be a string and contain &#39;Hello world&#39;.</li>
+            <li class="collection-item">The <code>doSomeMaths()</code> method must return the product of the two arguments passed to it.</li>
+          </ul>
+          <!-- /Challenge description -->
+        </div>
+        <div class="col s4">
+          Input :
+          <textarea id="editor" name="editor"></textarea>
+        <button  id="testBtn" class="btn btn-block">Test this code</button>
+        </div>
+        <div class="col s4">
+          Server response :
+          <div id="answer"></div>
+        </div>
+      </div>
+    </div>
+    <!-- /UI -->
+
+    <!--
+    Javascripts used for the interface
+    -->
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js'></script>
+    <!-- Materialize framework (UI)-->
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js'></script>
+    <!-- Codemirror -->
+    <script src='http://cdnjs.cloudflare.com/ajax/libs/codemirror/5.14.2/codemirror.js'></script>
+    <script src='http://cdnjs.cloudflare.com/ajax/libs/codemirror/5.15.2/addon/edit/matchbrackets.min.js'></script>
+    <script src='http://cdnjs.cloudflare.com/ajax/libs/codemirror/5.14.2/mode/htmlmixed/htmlmixed.min.js'></script>
+    <script src='http://cdnjs.cloudflare.com/ajax/libs/codemirror/5.14.2/mode/xml/xml.min.js'></script>
+    <script src='http://cdnjs.cloudflare.com/ajax/libs/codemirror/5.14.2/mode/javascript/javascript.min.js'></script>
+    <script src='http://cdnjs.cloudflare.com/ajax/libs/codemirror/5.14.2/mode/css/css.min.js'></script>
+    <script src='http://cdnjs.cloudflare.com/ajax/libs/codemirror/5.15.2/mode/clike/clike.min.js'></script>
+    <script src='http://cdnjs.cloudflare.com/ajax/libs/codemirror/5.15.2/mode/php/php.min.js'></script>
+
+    <!--
+    Javascript used for the challenges -->
+    <!-- REPL api -->
+    <script src="http://repl.it/lib/api.js"></script>
+    <script src="api-token.js"></script>
+
+    <!-- PHP assertions handler -->
+    <script src="php/fcc-php-assert-handler.js"></script>
+    <!-- Challenge content (data for the textarea) -->
+    <script src="php/001/001-challenge.js"></script>
+    <!-- PHP tests to test user input -->
+    <script src="php/001/001-test.js"></script>
+
+    <!-- Data manipulations and REPL queries -->
+    <script>
+      // Defining the language used
+      const LANGUAGE='php'
+
+      // Initial textarea value
+      $('#editor').html(CHALLENGE);
+
+      // Api configuration
+      var repl = new ReplitClient('api.repl.it', 80, LANGUAGE, API_TOKEN);
+      // Connection to REPL and set the status
+      repl.connect().then(
+        function() {$('#status').html('Connected to Repl'); $('.status-panel').addClass('green lighten-3 white-text')},
+        function() {$('#status').html('Failed to connect to Repl'); $('.status-panel').addClass('red lighten-3 white-text')}
+      );
+
+      /**
+      Function that will send the user's input and display the output
+      */
+      function testChallenge(){
+        // Resets the connection to avoid collisions with previously ran code
+        repl.reset();
+        // $('#answer').html(code+TEST);
+        repl.evaluate(prepareData(),{
+          // Managing answer
+          stdout: function(out){
+            var mess=out.split("\n");
+            var message='';
+
+            for (let i=0; i<mess.length; i++){
+              // Avoid blank lines and the PHP closing tag provided
+              // I think there is a workaround here, but for now it's ok.
+              if(mess[i]!='' && mess[i]!='?>'){
+                //Materialize.toast(mess[i], 3000);
+                message+='<div class="card-panel orange white-text">'+mess[i]+'</div>';
+              }
+            }
+          $('#answer').html(message);
+        }})
+          .then(function(result) {
+            // Code syntax error handling is here
+            if(result.error!=''){
+              $('#answer').html("ERROR:\n"+result.error);
+            }
+            //$('#answer').append(result.data);
+        });
+      }
+
+      function prepareData(){
+        var code=cmEditor.getValue();
+        switch(LANGUAGE){
+          case 'php':
+            // For PHP we have to add an escape token, to force the user to add its own PHP tags (<?php ?>)
+            return '?>' + code + PHP_ASSERT_HANDLER + CHALLENGE_ASSERTIONS;
+            break;
+          case 'rb':
+          case 'py':
+        }
+      }
+
+      /*
+
+      OTHER JS
+
+      */
+
+      // CodeMirror setup
+      var cmEditor = CodeMirror.fromTextArea(document.getElementById("editor"), {
+          lineNumbers: true,
+          matchBrackets: true,
+          mode: "application/x-httpd-php",
+          indentUnit: 2,
+          indentWithTabs: false,
+          minHeight:'150px',
+          height:'dynamic',
+      });
+
+      // Event binding
+      $('#testBtn').click(testChallenge);
+    </script>
+  </body>
+</html>
