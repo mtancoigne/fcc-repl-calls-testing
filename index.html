@@ -72,11 +72,11 @@
     <script src="api-token.js"></script>
 
     <!-- PHP assertions handler -->
-    <script src="challenges/php/fcc-php-assert-handler.js"></script>
+    <script src="php/fcc-php-assert-handler.js"></script>
     <!-- Challenge content (data for the textarea) -->
-    <script src="challenges/php/001/001-challenge.js"></script>
+    <script src="php/001/001-challenge.js"></script>
     <!-- PHP tests to test user input -->
-    <script src="challenges/php/001/001-test.js"></script>
+    <script src="php/001/001-test.js"></script>
 
     <!-- Data manipulations and REPL queries -->
     <script>
@@ -133,7 +133,8 @@
             // For PHP we have to add an escape token, to force the user to add its own PHP tags (<?php ?>)
             return '?>' + code + PHP_ASSERT_HANDLER + CHALLENGE_ASSERTIONS;
             break;
-          case 'rb':
+            case 'ruby':
+              return code + CHALLENGE_ASSERTIONS;
           case 'py':
         }
       }
